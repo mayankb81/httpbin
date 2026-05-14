@@ -11,3 +11,11 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "250m"
+audit:
+  db:
+    host: <+pipeline.variables.audit_db_host>
+    port: 3306
+    name: httpbin_audit
+    user: <+secrets.getValue("audit_db_user")>
+    password: <+secrets.getValue("audit_db_password")>
+  retentionDays: 30

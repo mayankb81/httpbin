@@ -20,6 +20,11 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: {{ .Values.service.targetPort }}
+        envFrom:
+        - configMapRef:
+            name: httpbin-audit-config
+        - secretRef:
+            name: httpbin-audit-secret
         livenessProbe:
           httpGet:
             path: /status/200
