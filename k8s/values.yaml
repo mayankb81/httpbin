@@ -1,0 +1,13 @@
+image: <+artifacts.primary.image>
+replicaCount: 2
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "250m"
