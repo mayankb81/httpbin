@@ -203,6 +203,26 @@
       font-family: 'Source Code Pro', monospace;
       font-size: 13px;
     }
+    .disabled-card p { color: #707070; max-width: 560px; margin: 12px auto; }
+    .env-table {
+      margin: 20px auto 8px;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    .env-table td {
+      padding: 6px 14px;
+      border-bottom: 1px solid #f2f2f2;
+    }
+    .env-table td:first-child { font-family: 'Source Code Pro', monospace; }
+    .env-table td:nth-child(2) {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #707070;
+    }
+    .env-table tr:last-child td { border-bottom: none; }
+    .disabled-card .hint { font-size: 13px; }
 
     .empty {
       text-align: center;
@@ -224,9 +244,16 @@
 
     {% if not enabled %}
       <div class="disabled-card">
-        <h2>Audit logging is disabled</h2>
-        <p>Set the <code>AUDIT_DB_URL</code> environment variable to a MySQL DSN to start collecting audit records.</p>
-        <p style="color:#707070;font-size:13px;">Example: <code>mysql+pymysql://user:pw@host:3306/httpbin_audit</code></p>
+        <h2>Audit logging is not configured</h2>
+        <p>Set the following environment variables and restart the app to enable this page:</p>
+        <table class="env-table">
+          <tr><td><code>AUDIT_DB_HOST</code></td><td>required</td><td>MySQL hostname</td></tr>
+          <tr><td><code>AUDIT_DB_USER</code></td><td>required</td><td>DB username</td></tr>
+          <tr><td><code>AUDIT_DB_PASSWORD</code></td><td>required</td><td>DB password</td></tr>
+          <tr><td><code>AUDIT_DB_PORT</code></td><td>optional</td><td>defaults to <code>3306</code></td></tr>
+          <tr><td><code>AUDIT_DB_NAME</code></td><td>optional</td><td>defaults to <code>httpbin_audit</code></td></tr>
+        </table>
+        <p class="hint">If you're running with <code>docker compose</code>, copy <code>.env.example</code> to <code>.env</code>, fill in the values, and run <code>docker compose up -d httpbin</code>.</p>
       </div>
     {% else %}
       <div class="stats">
