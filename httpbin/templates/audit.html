@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>httpbin · audit log</title>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/static/favicon.ico" sizes="64x64 32x32 16x16" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #fafafa;
+      font-family: 'Open Sans', sans-serif;
+      color: #3b4151;
+    }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+    /* header */
+    .header {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      padding: 18px 24px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .header h1 {
+      font-family: 'Titillium Web', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+      margin: 0;
+      color: #3b4151;
+    }
+    .header h1 .dot { color: #89bf04; padding: 0 6px; }
+    .header h1 .sub { font-weight: 400; color: #707070; font-size: 18px; }
+    .header .nav a {
+      color: #4990e2;
+      text-decoration: none;
+      font-size: 13px;
+      margin-left: 16px;
+    }
+    .header .nav a:hover { text-decoration: underline; }
+
+    /* stats */
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.4fr 2fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      padding: 16px 18px;
+      min-height: 110px;
+    }
+    .card .label {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #707070;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .card .big {
+      font-family: 'Titillium Web', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+      color: #3b4151;
+    }
+    .card .unit {
+      font-size: 12px;
+      color: #707070;
+      margin-top: 4px;
+    }
+    .card .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Source Code Pro', monospace;
+      font-size: 13px;
+      padding: 3px 0;
+    }
+    .card .row .name { color: #3b4151; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 8px; }
+    .card .row .n { color: #707070; font-weight: 600; }
+    .class-line { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+    .class-line .item { font-family: 'Source Code Pro', monospace; font-size: 14px; }
+    .class-line .item .k { font-weight: 600; padding: 1px 6px; border-radius: 3px; color: #fff; margin-right: 6px; font-size: 12px; }
+    .class-line .item .v { color: #3b4151; font-weight: 600; }
+    .k-2xx { background: #49cc90; }
+    .k-3xx { background: #9012fe; }
+    .k-4xx { background: #fca130; }
+    .k-5xx { background: #f93e3e; }
+
+    /* table */
+    .table-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      text-align: left;
+      background: #fafafa;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 10px 12px;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #707070;
+    }
+    tbody td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #f2f2f2;
+      font-family: 'Source Code Pro', monospace;
+      color: #3b4151;
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #f7f7f7; }
+    td.num { text-align: right; }
+    td.path, td.ua { font-family: 'Source Code Pro', monospace; word-break: break-all; }
+    td.ua { color: #707070; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    td.ts { color: #707070; white-space: nowrap; }
+
+    /* method pill */
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      font-family: 'Titillium Web', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      color: #fff;
+      border-radius: 3px;
+      min-width: 54px;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    .m-GET { background: #61affe; }
+    .m-POST { background: #49cc90; }
+    .m-PUT { background: #fca130; }
+    .m-DELETE { background: #f93e3e; }
+    .m-PATCH { background: #50e3c2; }
+    .m-HEAD { background: #9012fe; }
+    .m-OPTIONS { background: #0d5aa7; }
+    .m-OTHER { background: #707070; }
+
+    /* status pill */
+    .s-2 { color: #49cc90; font-weight: 700; }
+    .s-3 { color: #9012fe; font-weight: 700; }
+    .s-4 { color: #fca130; font-weight: 700; }
+    .s-5 { color: #f93e3e; font-weight: 700; }
+
+    /* pager */
+    .pager {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 18px;
+      font-family: 'Open Sans', sans-serif;
+      font-size: 14px;
+    }
+    .pager a {
+      color: #4990e2;
+      text-decoration: none;
+      padding: 6px 14px;
+      border: 1px solid #e8e8e8;
+      border-radius: 3px;
+      background: #fff;
+    }
+    .pager a:hover { background: #f7f7f7; }
+    .pager .page-num { color: #707070; }
+    .pager .placeholder { width: 78px; }
+
+    /* disabled state */
+    .disabled-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      padding: 64px 24px;
+      text-align: center;
+    }
+    .disabled-card h2 {
+      font-family: 'Titillium Web', sans-serif;
+      color: #3b4151;
+      margin: 0 0 12px;
+    }
+    .disabled-card code {
+      background: #f2f2f2;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Source Code Pro', monospace;
+      font-size: 13px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #707070;
+      padding: 48px 0;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <h1>httpbin<span class="dot">·</span><span class="sub">audit log</span></h1>
+      <div class="nav">
+        <a href="/">API console</a>
+        <a href="/legacy">Docs</a>
+      </div>
+    </div>
+
+    {% if not enabled %}
+      <div class="disabled-card">
+        <h2>Audit logging is disabled</h2>
+        <p>Set the <code>AUDIT_DB_URL</code> environment variable to a MySQL DSN to start collecting audit records.</p>
+        <p style="color:#707070;font-size:13px;">Example: <code>mysql+pymysql://user:pw@host:3306/httpbin_audit</code></p>
+      </div>
+    {% else %}
+      <div class="stats">
+        <div class="card">
+          <div class="label">Last 1h</div>
+          <div class="big">{{ "{:,}".format(stats.count_1h) }}</div>
+          <div class="unit">requests</div>
+        </div>
+        <div class="card">
+          <div class="label">Last 24h</div>
+          <div class="big">{{ "{:,}".format(stats.count_24h) }}</div>
+          <div class="unit">requests</div>
+        </div>
+        <div class="card">
+          <div class="label">Status classes (24h)</div>
+          <div class="class-line">
+            <div class="item"><span class="k k-2xx">2xx</span><span class="v">{{ stats.status_classes['2xx'] }}</span></div>
+            <div class="item"><span class="k k-3xx">3xx</span><span class="v">{{ stats.status_classes['3xx'] }}</span></div>
+            <div class="item"><span class="k k-4xx">4xx</span><span class="v">{{ stats.status_classes['4xx'] }}</span></div>
+            <div class="item"><span class="k k-5xx">5xx</span><span class="v">{{ stats.status_classes['5xx'] }}</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="label">Top paths (24h)</div>
+          {% if stats.top_paths %}
+            {% for path, n in stats.top_paths %}
+              <div class="row"><span class="name">{{ path }}</span><span class="n">{{ "{:,}".format(n) }}</span></div>
+            {% endfor %}
+          {% else %}
+            <div class="row" style="color:#707070;font-style:italic;">No requests yet</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Time (UTC)</th>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Status</th>
+              <th>IP</th>
+              <th>User-Agent</th>
+              <th style="text-align:right;">ms</th>
+              <th style="text-align:right;">Bytes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if rows %}
+              {% for r in rows %}
+                {% set m = (r.method or 'OTHER')|upper %}
+                {% set m_class = 'm-' ~ m if m in ['GET','POST','PUT','DELETE','PATCH','HEAD','OPTIONS'] else 'm-OTHER' %}
+                {% set scls = 's-' ~ ((r.status or 0) // 100) %}
+                <tr>
+                  <td class="ts">{{ r.ts.strftime('%Y-%m-%d %H:%M:%S') if r.ts else '' }}</td>
+                  <td><span class="pill {{ m_class }}">{{ m }}</span></td>
+                  <td class="path">{{ r.path }}{% if r.query_string %}<span style="color:#707070;">?{{ r.query_string }}</span>{% endif %}</td>
+                  <td class="{{ scls }}">{{ r.status if r.status is not none else '—' }}</td>
+                  <td>{{ r.client_ip or '' }}</td>
+                  <td class="ua" title="{{ r.user_agent or '' }}">{{ r.user_agent or '' }}</td>
+                  <td class="num">{{ r.response_time_ms if r.response_time_ms is not none else '' }}</td>
+                  <td class="num">{{ r.bytes_sent if r.bytes_sent is not none else '' }}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="8" class="empty">No audit records yet. Hit any httpbin endpoint and refresh.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+        <div class="pager">
+          {% if page > 1 %}
+            <a href="?page={{ page - 1 }}">◀ Prev</a>
+          {% else %}
+            <span class="placeholder"></span>
+          {% endif %}
+          <span class="page-num">Page {{ page }}</span>
+          {% if has_next %}
+            <a href="?page={{ page + 1 }}">Next ▶</a>
+          {% else %}
+            <span class="placeholder"></span>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

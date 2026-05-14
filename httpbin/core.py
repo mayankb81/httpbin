@@ -33,7 +33,7 @@ from werkzeug.wrappers import BaseResponse
 from werkzeug.http import parse_authorization_header
 from flasgger import Swagger, NO_SANITIZER
 
-from . import filters
+from . import audit, filters
 from .helpers import (
     get_headers,
     status_code,
@@ -160,6 +160,8 @@ swagger_config = {
 
 swagger = Swagger(app, sanitizer=NO_SANITIZER, template=template, config=swagger_config)
 
+audit.init(app)
+
 # Set up Bugsnag exception tracking, if desired. To use Bugsnag, install the
 # Bugsnag Python client with the command "pip install bugsnag", and set the
 # environment variable BUGSNAG_API_KEY. You can also optionally set
@@ -241,6 +243,22 @@ def set_cors_headers(response):
 def view_landing_page():
     """Generates Landing Page in legacy layout."""
     return render_template("index.html")
+
+
+@app.route("/audit")
+def view_audit():
+    """Renders the audit log viewer."""
+    page = max(1, request.args.get("page", 1, type=int))
+    rows = audit.fetch_page(50, (page - 1) * 50)
+    stats = audit.fetch_stats()
+    return render_template(
+        "audit.html",
+        enabled=audit.is_enabled(),
+        rows=rows,
+        stats=stats,
+        page=page,
+        has_next=len(rows) == 50,
+    )
 
 
 @app.route("/html")
