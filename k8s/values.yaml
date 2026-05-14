@@ -1,5 +1,5 @@
 image: <+artifacts.primary.image>
-replicaCount: 2
+replicaCount: 1
 service:
   type: ClusterIP
   port: 80
