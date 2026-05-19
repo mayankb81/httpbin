@@ -1,0 +1,11 @@
+image: <+artifacts.primary.image>
+
+httpbin:
+  db:
+    host: <+variables.audit_db_host>
+    port: "3306"
+    name: "httpbin_audit"
+    user: <+secrets.getValue("audit_db_user")>
+    password: <+secrets.getValue("audit_db_password")>
+  audit:
+    retentionDays: "30"
