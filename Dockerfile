@@ -3,8 +3,8 @@ FROM python:3.9-slim as builder
 WORKDIR /app
 COPY requirements.txt setup.py MANIFEST.in ./
 COPY httpbin/ ./httpbin/
-RUN pip install --no-cache-dir -r requirements.txt .
-
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir .
 FROM python:3.9-slim as runtime
 
 LABEL name="httpbin"
