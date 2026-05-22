@@ -3,8 +3,13 @@ FROM python:3.9-slim as builder
 WORKDIR /app
 COPY requirements.txt setup.py MANIFEST.in ./
 COPY httpbin/ ./httpbin/
+
+# 1. Install your clean, updated requirements first
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir .
+
+# 2. Install httpbin without letting setup.py try to download old dependencies
+RUN pip install --no-cache-dir --no-deps .
+
 FROM python:3.9-slim as runtime
 
 LABEL name="httpbin"
@@ -24,7 +29,7 @@ COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app /app
 
-RUN pip install --no-cache-dir gunicorn==20.1.0
+RUN pip install --no-cache-dir gunicorn==20.1.0 gevent==24.2.1
 
 USER 1001
 EXPOSE 80
