@@ -52,13 +52,13 @@ spec:
               key: AUDIT_DB_PASSWORD
         livenessProbe:
           httpGet:
-            path: /status
+            path: /status/200
             port: 80
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /status
+            path: /status/200
             port: 80
           initialDelaySeconds: 5
           periodSeconds: 5
