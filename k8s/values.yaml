@@ -2,7 +2,7 @@ image: <+artifacts.primary.image>
 
 httpbin:
   db:
-    host: <+serviceVariables.audit_db_host>
+    host: <+variable.audit_db_host>
     port: "3306"
     name: "httpbin_audit"
     user: <+secrets.getValue("audit_db_user")>
