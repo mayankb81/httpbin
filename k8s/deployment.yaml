@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: httpbin
-        image: <+artifacts.primary.image>
+        image: {{ .Values.image }}
         ports:
         - containerPort: 80
         env:
