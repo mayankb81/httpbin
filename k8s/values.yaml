@@ -1,0 +1,18 @@
+image: <+artifacts.primary.image>
+
+httpbin:
+  audit:
+    db:
+      host: <+variable.audit_db_host>
+      port: "3306"
+      name: "httpbin_audit"
+      user: "httpbin"
+      password: <+secrets.getValue("audit_db_password")>
+    retention:
+      days: "30"
+  mysql:
+    root:
+      password: <+secrets.getValue("mysql_password")>
+    database: "httpbin_audit"
+    user: "httpbin"
+    password: <+secrets.getValue("mysql_password")>
